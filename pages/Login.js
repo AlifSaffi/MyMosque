@@ -1,143 +1,93 @@
-import React from 'react';
-import { StyleSheet, TextInput, View, Alert, Button, Text} from 'react-native';
+class HomeScreen extends React.Component {
 
+  constructor(props){
+    super(props);
 
-class LoginActivity extends React.Component {
-  
-    static navigationOptions =
-     {
-        title: 'Login',
-     };
-   
-  constructor(props) {
-   
-      super(props)
-   
-      this.state = {
-   
-        UserEmail: '',
-        UserPassword: ''
-   
-      }
-   
-    }
-   
-  UserLoginFunction = () =>{
-   
-   const { UserEmail }  = this.state ;
-   const { UserPassword }  = this.state ;
-   
-   
-  fetch('https://reactnativecode.000webhostapp.com/User_Login.php', {
-    method: 'POST',
-    headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-   
-      email: UserEmail,
-   
-      password: UserPassword
-   
-    })
-   
-  }).then((response) => response.json())
-        .then((responseJson) => {
-   
-          // If server response message same as Data Matched
-         if(responseJson === 'Data Matched')
-          {
-   
-              //Then open Profile activity and send user email to profile activity.
-              this.props.navigation.navigate('Second', { Email: UserEmail });
-   
-          }
-          else{
-   
-            Alert.alert(responseJson);
-          }
-   
-        }).catch((error) => {
-          console.error(error);
-        });
-   
-   
-    }
-   
-    render() {
-      return (
-   
-  <View style={styles.MainContainer}>
-   
-          <Text style= {styles.TextComponentStyle}>User Login Form</Text>
-    
-          <TextInput
-            
-            // Adding hint in Text Input using Place holder.
-            placeholder="Enter User Email"
-   
-            onChangeText={UserEmail => this.setState({UserEmail})}
-   
-            // Making the Under line Transparent.
-            underlineColorAndroid='transparent'
-   
-            style={styles.TextInputStyleClass}
-          />
-   
-          <TextInput
-            
-            // Adding hint in Text Input using Place holder.
-            placeholder="Enter User Password"
-   
-            onChangeText={UserPassword => this.setState({UserPassword})}
-   
-            // Making the Under line Transparent.
-            underlineColorAndroid='transparent'
-   
-            style={styles.TextInputStyleClass}
-   
-            secureTextEntry={true}
-          />
-   
-          <Button title="Click Here To Login" onPress={this.UserLoginFunction} color="#2196F3" />
-        
-    
-   
-  </View>
-              
-      );
+    this.state ={
+      userEmail: '',
+      userPassword: ''
     }
   }
 
-  export default LoginActivity;
+  login = ()=>{
+    const {userEmail,userPassword} = this.state;
+		let reg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/ ;
+		if(userEmail==""){
+			Alert.alert("Please enter Email address");
+		  this.setState({email:'Please enter Email address'})
+			
+		}
+		
+		else if(reg.test(userEmail) === false)
+		{
+		Alert.alert("Email is Not Correct");
+		this.setState({email:'Email is Not Correct'})
+		return false;
+		  }
 
-  const styles = StyleSheet.create({
- 
-    MainContainer :{
-     
-    justifyContent: 'center',
-    flex:1,
-    margin: 10,
-    },
-     
-    TextInputStyleClass: {
-     
-    textAlign: 'center',
-    marginBottom: 7,
-    height: 40,
-    borderWidth: 1,
-    borderColor: '#2196F3',
-    borderRadius: 5 ,
-     
-    },
-     
-     TextComponentStyle: {
-       fontSize: 20,
-      color: "#000",
-      textAlign: 'center', 
-      marginBottom: 15
-     }
-    });
+		else if(userPassword==""){
+    Alert.alert("Please enter password") 
+		this.setState({email:'Please enter password'})
+		}
+		else{
+		
+		fetch('https://mymosque.000webhostapp.com/login.php',{
+			method:'post',
+			header:{
+				'Accept': 'application/json',
+				'Content-type': 'application/json'
+			},
+			body:JSON.stringify({
+				// we will pass our input data to server
+				email: userEmail,
+				password: userPassword
+			})
+			
+		})
+		.then((response) => response.json())
+		 .then((responseJson)=>{
+			 if(responseJson == "ok"){
+				 // redirect to profile page
+				 Alert.alert("Successfully Login");
+				 this.props.navigation.navigate("Details");
+			 }else{
+				 Alert.alert("Wrong Login Details");
+			 }
+		 })
+		 .catch((error)=>{
+		 console.error(error);
+		 });
+		}
+		
+		
+		Keyboard.dismiss();
+  }
+  static navigationOptions = {
+      title: 'Login',
+  };
+  render() {
+    return (
+      <View style={ styles.container }>
+        <Text style={{fontSize:20}}>Login</Text>
 
+        <TextInput placeholder='Username' style={ styles.input } onChangeText={userEmail => this.setState({userEmail})}/>
+        <TextInput placeholder='Password' style={ styles.input} onChangeText={userPassword => this.setState({userPassword})} secureTextEntry={true}/>
 
+        <TouchableOpacity
+          style={{width:'80%',padding:10,backgroundColor:'blue',alignItems:'center', marginBottom:10, borderRadius:20}}
+          onPress={this.login}
+        >
+        <Text style={{color:'white'}}>Login</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={{width:'80%',padding:10,backgroundColor:'blue',alignItems:'center', borderRadius:20}}
+          onPress={() => this.props.navigation.navigate('Register')}
+        >
+        <Text style={{color:'white'}}>Register</Text>
+        </TouchableOpacity>
+        
+      </View>
+    );
+  }
+}
